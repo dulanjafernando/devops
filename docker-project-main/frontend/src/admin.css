@@ -1,0 +1,452 @@
+/* Admin Panel Styling */
+.admin-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    margin-bottom: 40px;
+    text-align: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.admin-header h1 {
+    font-size: 2.5em;
+    margin: 0;
+    flex: 1;
+    min-width: 250px;
+}
+
+.logout-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+}
+
+.logout-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+}
+
+.alert {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    animation: slideDown 0.5s ease-out;
+    text-align: center;
+    font-weight: 500;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.alert-error {
+    background-color: #fee;
+    color: #c33;
+    border: 1px solid #fcc;
+}
+
+.alert-success {
+    background-color: #efe;
+    color: #3c3;
+    border: 1px solid #cfc;
+}
+
+.admin-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+/* Form Section */
+.add-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.btn-add {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-add:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.food-form {
+    background: white;
+}
+
+.food-form h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input[type="file"] {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.form-group input[type="file"]::file-selector-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 10px;
+    transition: all 0.3s ease;
+}
+
+.form-group input[type="file"]::file-selector-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.file-info {
+    font-size: 0.85em;
+    color: #999;
+    margin-top: 8px;
+    margin-bottom: 15px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.image-preview {
+    margin-top: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 250px;
+    border: 2px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    max-height: 250px;
+}
+
+.form-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.btn-save,
+.btn-cancel {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-save:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-cancel {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-cancel:hover {
+    background: #d0d0d0;
+}
+
+/* Food List Section */
+.food-list-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    max-height: 800px;
+    overflow-y: auto;
+}
+
+.food-list-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.food-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.food-item {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    align-items: center;
+}
+
+.food-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+}
+
+.food-item-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.food-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.food-item-details {
+    flex: 1;
+}
+
+.food-item-details h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.food-item-details .price {
+    margin: 0 0 5px 0;
+    color: #667eea;
+    font-weight: 700;
+    font-size: 1.05em;
+}
+
+.food-item-details .description {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+    max-height: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.food-item-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.btn-edit,
+.btn-delete {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-edit {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    background: #ff6b6b;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #ee5a5a;
+    transform: translateY(-2px);
+}
+
+.loading {
+    text-align: center;
+    color: #667eea;
+    font-weight: 600;
+    padding: 20px;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .admin-content {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-header h1 {
+        font-size: 2em;
+    }
+
+    .food-list-section {
+        max-height: 600px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+    }
+
+    .admin-header h1 {
+        font-size: 1.5em;
+    }
+
+    .logout-btn {
+        width: 100%;
+    }
+
+    .food-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .food-item-image {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+
+    .food-item-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        flex: 1;
+        max-width: 120px;
+    }
+
+    .form-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-container {
+        padding: 15px 10px;
+    }
+
+    .add-section,
+    .food-list-section {
+        padding: 15px;
+    }
+
+    .admin-header h1 {
+        font-size: 1.2em;
+    }
+
+    .food-list-section h2,
+    .food-form h2 {
+        font-size: 1.1em;
+    }
+
+    .food-item {
+        padding: 12px;
+    }
+
+    .food-item-image {
+        width: 100px;
+        height: 100px;
+    }
+}
