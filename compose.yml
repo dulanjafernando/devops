@@ -26,5 +26,15 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    restart: unless-stopped
+
 volumes:
   mongo_data:
+  jenkins_home:
