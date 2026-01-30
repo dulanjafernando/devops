@@ -8,7 +8,7 @@ pipeline {
         BACKEND_IMAGE = "dulanjaf/backend-app"
 
         // Git repository URL
-        GIT_REPO = "https://github.com/dulanjaf/devops.git"
+        GIT_REPO = "https://github.com/dulanjafernando/devops.git"
 
         // AWS credentials for Terraform
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')

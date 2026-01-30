@@ -1,0 +1,56 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region     = "ap-south-1"
+}
+
+resource "aws_instance" "my_ec2" {
+  ami           = "ami-02eb7a4783e7e9317" # Amazon Linux 2 (ap-south-1)
+  instance_type = "t3.micro"
+
+  tags = {
+    Name = "Terraform-EC2-NoCLI"
+  }
+
+}
+  resource "aws_security_group" "web_sg" {
+  name        = "terraform-web-sg"
+  description = "Allow SSH and HTTP"
+  vpc_id      = "vpc-0dc1d85425b512e49"
+
+  ingress {
+    description = "SSH access"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTP access"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "Terraform-Web-SG"
+  }
+}
+
+
