@@ -4,34 +4,45 @@ pipeline {
     environment {
         // Docker Hub credentials stored in Jenkins
         DOCKER_CREDENTIALS_ID = 'dockerhub'
-        FRONTEND_IMAGE = "dulanjaf/frontend-app"
-        BACKEND_IMAGE = "dulanjaf/backend-app"
-
+        FRONTEND_IMAGE = "dulanjah/frontend-app"
+        BACKEND_IMAGE = "dulanjah/backend-app"
+        
         // Git repository URL
         GIT_REPO = "https://github.com/dulanjafernando/devops.git"
-
+        
         // AWS credentials for Terraform
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
 
     stages {
-
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: "${GIT_REPO}"
-            }
-        }
-
-        stage('Build Frontend Docker Image') {
-            steps {
-                sh "docker build -t ${FRONTEND_IMAGE}:latest -f frontend/Dockerfile frontend"
+                git branch: 'main', 
+                url: "${GIT_REPO}",
+                credentialsId: 'github-token' // Use your GitHub credentials ID
             }
         }
 
         stage('Build Backend Docker Image') {
             steps {
-                sh "docker build -t ${BACKEND_IMAGE}:latest -f backend/Dockerfile backend"
+                dir('backend') {
+                    sh """
+                        docker build -t ${BACKEND_IMAGE}:latest -f Dockerfile .
+                        docker tag ${BACKEND_IMAGE}:latest ${BACKEND_IMAGE}:\${BUILD_NUMBER}
+                    """
+                }
+            }
+        }
+
+        stage('Build Frontend Docker Image') {
+            steps {
+                dir('frontend') {
+                    sh """
+                        docker build -t ${FRONTEND_IMAGE}:latest -f Dockerfile .
+                        docker tag ${FRONTEND_IMAGE}:latest ${FRONTEND_IMAGE}:\${BUILD_NUMBER}
+                    """
+                }
             }
         }
 
@@ -42,39 +53,50 @@ pipeline {
                     usernameVariable: 'DOCKER_USER', 
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ${FRONTEND_IMAGE}:latest
+                    sh """
+                        echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
                         docker push ${BACKEND_IMAGE}:latest
-                    '''
+                        docker push ${BACKEND_IMAGE}:\${BUILD_NUMBER}
+                        docker push ${FRONTEND_IMAGE}:latest
+                        docker push ${FRONTEND_IMAGE}:\${BUILD_NUMBER}
+                        docker logout
+                    """
                 }
             }
         }
 
-        /* ================= CD PART: Deploy with Terraform ================= */
-
         stage('Terraform Init') {
             steps {
-                sh '''
-                    cd terraform_devops/terraform-ec2
-                    terraform init
-                '''
+                dir('terraform-ec2') {
+                    sh """
+                        terraform init
+                    """
+                }
             }
         }
 
         stage('Terraform Apply (Deploy to AWS)') {
             steps {
-                sh '''
-                    cd terraform_devops/terraform-ec2
-                    terraform apply -auto-approve
-                '''
+                dir('terraform-ec2') {
+                    sh """
+                        terraform apply -auto-approve
+                    """
+                }
             }
         }
     }
 
     post {
+        success {
+            echo 'Pipeline completed successfully!'
+            echo "Backend Image: ${BACKEND_IMAGE}:\${BUILD_NUMBER}"
+            echo "Frontend Image: ${FRONTEND_IMAGE}:\${BUILD_NUMBER}"
+        }
+        failure {
+            echo 'Pipeline failed! Check logs above for errors.'
+        }
         always {
-            sh "docker logout"
+            cleanWs() // Clean workspace
         }
     }
 }
