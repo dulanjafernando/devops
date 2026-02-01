@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'dockerhub'
+        GIT_REPO = "https://github.com/dulanjafernando/devops.git"
+        DOCKER_CREDENTIALS_ID = "dockerhub"
         FRONTEND_IMAGE = "dulanjah/frontend-app"
         BACKEND_IMAGE = "dulanjah/backend-app"
-        GIT_REPO = "https://github.com/dulanjafernando/devops.git"
     }
 
     stages {
@@ -20,11 +20,11 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    dir('terraform-ec2') {
+                dir('terraform-ec2') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-credentials']
+                    ]) {
                         sh 'terraform init'
                     }
                 }
@@ -33,11 +33,11 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    dir('terraform-ec2') {
+                dir('terraform-ec2') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-credentials']
+                    ]) {
                         sh 'terraform plan'
                     }
                 }
@@ -46,11 +46,11 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    dir('terraform-ec2') {
+                dir('terraform-ec2') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-credentials']
+                    ]) {
                         sh 'terraform apply -auto-approve'
                     }
                 }
@@ -61,6 +61,15 @@ pipeline {
             steps {
                 cleanWs()
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline completed successfully'
+        }
+        failure {
+            echo '❌ Pipeline failed – check logs above'
         }
     }
 }
