@@ -6,8 +6,6 @@ pipeline {
         FRONTEND_IMAGE = "dulanjah/frontend-app"
         BACKEND_IMAGE = "dulanjah/backend-app"
         GIT_REPO = "https://github.com/dulanjafernando/devops.git"
-        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
 
     stages {
@@ -15,56 +13,29 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 git branch: 'main',
-                    url: GIT_REPO,
+                    url: "${GIT_REPO}",
                     credentialsId: 'github-token'
             }
         }
 
-        stage('Build Backend') {
+        stage('Build Backend Image') {
             steps {
                 dir('backend') {
-                    sh 'docker build -t ${BACKEND_IMAGE}:${BUILD_NUMBER} .'
-                }
-            }
-        }
-
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    sh 'docker build -t ${FRONTEND_IMAGE}:${BUILD_NUMBER} .'
-                }
-            }
-        }
-
-        stage('Push Images') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: DOCKER_CREDENTIALS_ID,
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
                     sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ${BACKEND_IMAGE}:${BUILD_NUMBER}
-                        docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER}
-                        docker logout
+                        docker build -t ${BACKEND_IMAGE}:latest .
+                        docker tag ${BACKEND_IMAGE}:latest ${BACKEND_IMAGE}:${BUILD_NUMBER}
                     '''
                 }
             }
         }
 
-        stage('Terraform Init') {
+        stage('Build Frontend Image') {
             steps {
-                dir('terraform-ec2') {
-                    sh 'terraform init'
-                }
-            }
-        }
-
-        stage('Terraform Apply') {
-            steps {
-                dir('terraform-ec2') {
-                    sh 'terraform apply -auto-approve'
+                dir('frontend') {
+                    sh '''
+                        docker build -t ${FRONTEND_IMAGE}:latest .
+                        docker tag ${FRONTEND_IMAGE}:latest ${FRONTEND_IMAGE}:${BUILD_NUMBER}
+                    '''
                 }
             }
         }
@@ -78,10 +49,10 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully'
+            echo "Pipeline completed successfully"
         }
         failure {
-            echo 'Pipeline failed – check above logs'
+            echo "Pipeline failed – check logs"
         }
     }
 }
