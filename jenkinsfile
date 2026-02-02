@@ -2,17 +2,28 @@ pipeline {
     agent any
 
     environment {
+        // Git
+        GIT_REPO = "https://github.com/dulanjafernando/devops.git"
+        GIT_BRANCH = "main"
+        GIT_CREDENTIALS = "github-token"
+
+        // Docker
         DOCKER_CREDENTIALS_ID = "dockerhub"
         FRONTEND_IMAGE = "dulanjah/frontend-app"
         BACKEND_IMAGE  = "dulanjah/backend-app"
+
+        // AWS / Terraform
         AWS_CREDENTIALS_ID = "aws-credentials"
     }
 
     stages {
 
-        stage('Checkout Source') {
+        stage('Clone Repository') {
             steps {
-                checkout scm
+                echo "Cloning source code..."
+                git branch: "${GIT_BRANCH}",
+                    url: "${GIT_REPO}",
+                    credentialsId: "${GIT_CREDENTIALS}"
             }
         }
 
@@ -47,10 +58,13 @@ pipeline {
                 )]) {
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
                         docker push ${BACKEND_IMAGE}:latest
                         docker push ${BACKEND_IMAGE}:${BUILD_NUMBER}
+
                         docker push ${FRONTEND_IMAGE}:latest
                         docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER}
+
                         docker logout
                     '''
                 }
@@ -96,7 +110,7 @@ pipeline {
             }
         }
 
-        stage('Cleanup') {
+        stage('Cleanup Workspace') {
             steps {
                 cleanWs()
             }
@@ -108,7 +122,7 @@ pipeline {
             echo "✅ Pipeline completed successfully"
         }
         failure {
-            echo "❌ Pipeline failed – check logs"
+            echo "❌ Pipeline failed – check the logs above"
         }
     }
 }
