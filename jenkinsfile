@@ -7,10 +7,13 @@ pipeline {
         GIT_BRANCH = "main"
         GIT_CREDENTIALS = "github-token"
 
-        // Docker
+        // Docker Hub
         DOCKER_CREDENTIALS_ID = "dockerhub"
-        FRONTEND_IMAGE = "dulanjah/frontend-app"
-        BACKEND_IMAGE  = "dulanjah/backend-app"
+        DOCKER_REPO = "dulanjah/devops_engineering"
+
+        // Image tags
+        BACKEND_IMAGE  = "${DOCKER_REPO}:backend"
+        FRONTEND_IMAGE = "${DOCKER_REPO}:frontend"
 
         // AWS / Terraform
         AWS_CREDENTIALS_ID = "aws-credentials"
@@ -20,7 +23,7 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                echo "Cloning source code..."
+                echo "Cloning source code from GitHub..."
                 git branch: "${GIT_BRANCH}",
                     url: "${GIT_REPO}",
                     credentialsId: "${GIT_CREDENTIALS}"
@@ -122,7 +125,7 @@ pipeline {
             echo "✅ Pipeline completed successfully"
         }
         failure {
-            echo "❌ Pipeline failed – check the logs above"
+            echo "❌ Pipeline failed – check logs above"
         }
     }
 }
