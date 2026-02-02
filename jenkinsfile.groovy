@@ -5,8 +5,8 @@ pipeline {
         // Git & Docker
         GIT_REPO = "https://github.com/dulanjafernando/devops.git"
         DOCKER_CREDENTIALS_ID = "dockerhub"
-        FRONTEND_IMAGE = "dulanjah/frontend-app"
-        BACKEND_IMAGE = "dulanjah/backend-app"
+        FRONTEND_IMAGE = "dulanjah/devops_engineering/frontend-app"
+        BACKEND_IMAGE = "dulanjah/devops_engineering/backend-app"
 
         // AWS credentials for Terraform
         AWS_CREDENTIALS_ID = "aws-credentials"
@@ -123,3 +123,4 @@ pipeline {
         }
     }
 }
+
