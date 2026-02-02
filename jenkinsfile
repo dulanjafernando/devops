@@ -2,20 +2,19 @@ pipeline {
     agent any
 
     environment {
-        // Git
-        GIT_REPO = "https://github.com/dulanjafernando/devops.git"
-        GIT_BRANCH = "main"
-        GIT_CREDENTIALS = "github-token"
+        // ---------------- GIT ----------------
+        GIT_REPO        = "https://github.com/dulanjafernando/devops.git"
+        GIT_BRANCH     = "main"
+        GIT_CREDENTIAL = "github-token"
 
-        // Docker Hub
+        // ------------- DOCKER HUB -------------
         DOCKER_CREDENTIALS_ID = "dockerhub"
-        DOCKER_REPO = "dulanjah/devops_engineering"
+        DOCKER_REPO           = "dulanjah/devops_engineering"
 
-        // Image tags
         BACKEND_IMAGE  = "${DOCKER_REPO}:backend"
         FRONTEND_IMAGE = "${DOCKER_REPO}:frontend"
 
-        // AWS / Terraform
+        // ------------- AWS / TERRAFORM --------
         AWS_CREDENTIALS_ID = "aws-credentials"
     }
 
@@ -23,20 +22,19 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                echo "Cloning source code from GitHub..."
                 git branch: "${GIT_BRANCH}",
                     url: "${GIT_REPO}",
-                    credentialsId: "${GIT_CREDENTIALS}"
+                    credentialsId: "${GIT_CREDENTIAL}"
             }
         }
 
         stage('Build Backend Image') {
             steps {
                 dir('docker-project-main/backend') {
-                    sh '''
+                    sh """
                         docker build -t ${BACKEND_IMAGE}:latest .
                         docker tag ${BACKEND_IMAGE}:latest ${BACKEND_IMAGE}:${BUILD_NUMBER}
-                    '''
+                    """
                 }
             }
         }
@@ -44,22 +42,24 @@ pipeline {
         stage('Build Frontend Image') {
             steps {
                 dir('docker-project-main/frontend') {
-                    sh '''
+                    sh """
                         docker build -t ${FRONTEND_IMAGE}:latest .
                         docker tag ${FRONTEND_IMAGE}:latest ${FRONTEND_IMAGE}:${BUILD_NUMBER}
-                    '''
+                    """
                 }
             }
         }
 
         stage('Push Docker Images') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: DOCKER_CREDENTIALS_ID,
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: DOCKER_CREDENTIALS_ID,
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh """
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
                         docker push ${BACKEND_IMAGE}:latest
@@ -69,7 +69,7 @@ pipeline {
                         docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER}
 
                         docker logout
-                    '''
+                    """
                 }
             }
         }
@@ -81,7 +81,7 @@ pipeline {
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: AWS_CREDENTIALS_ID]
                     ]) {
-                        sh 'terraform init'
+                        sh "terraform init"
                     }
                 }
             }
@@ -94,7 +94,7 @@ pipeline {
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: AWS_CREDENTIALS_ID]
                     ]) {
-                        sh 'terraform plan'
+                        sh "terraform plan"
                     }
                 }
             }
@@ -107,7 +107,7 @@ pipeline {
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: AWS_CREDENTIALS_ID]
                     ]) {
-                        sh 'terraform apply -auto-approve'
+                        sh "terraform apply -auto-approve"
                     }
                 }
             }
