@@ -2,30 +2,20 @@ pipeline {
     agent any
 
     environment {
-        // Git & Docker
-        GIT_REPO = "https://github.com/dulanjafernando/devops.git"
         DOCKER_CREDENTIALS_ID = "dockerhub"
         FRONTEND_IMAGE = "dulanjah/frontend-app"
-        BACKEND_IMAGE = "dulanjah/backend-app"
-
-        // AWS credentials for Terraform
+        BACKEND_IMAGE  = "dulanjah/backend-app"
         AWS_CREDENTIALS_ID = "aws-credentials"
     }
 
     stages {
 
-        // 1️⃣ Clone repository
-        stage('Clone Repository') {
+        stage('Checkout Source') {
             steps {
-                git branch: 'main',
-                    url: GIT_REPO,
-                    credentialsId: 'github-token'
+                checkout scm
             }
         }
 
-        // 2️⃣ Build Backend Docker image
-        // Jenkins is checking out the whole repo into the workspace root,
-        // and the backend Dockerfile lives under docker-project-main/backend
         stage('Build Backend Image') {
             steps {
                 dir('docker-project-main/backend') {
@@ -37,8 +27,6 @@ pipeline {
             }
         }
 
-        // 3️⃣ Build Frontend Docker image
-        // Frontend Dockerfile lives under docker-project-main/frontend
         stage('Build Frontend Image') {
             steps {
                 dir('docker-project-main/frontend') {
@@ -50,7 +38,6 @@ pipeline {
             }
         }
 
-        // 4️⃣ Push Docker images to Docker Hub
         stage('Push Docker Images') {
             steps {
                 withCredentials([usernamePassword(
@@ -70,13 +57,12 @@ pipeline {
             }
         }
 
-        // 5️⃣ Terraform Init
-        // Terraform code lives under terraform_devops/terrafor-ec2
         stage('Terraform Init') {
             steps {
                 dir('terraform_devops/terrafor-ec2') {
                     withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: AWS_CREDENTIALS_ID]
                     ]) {
                         sh 'terraform init'
                     }
@@ -84,12 +70,12 @@ pipeline {
             }
         }
 
-        // 6️⃣ Terraform Plan
         stage('Terraform Plan') {
             steps {
                 dir('terraform_devops/terrafor-ec2') {
                     withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: AWS_CREDENTIALS_ID]
                     ]) {
                         sh 'terraform plan'
                     }
@@ -97,12 +83,12 @@ pipeline {
             }
         }
 
-        // 7️⃣ Terraform Apply
         stage('Terraform Apply') {
             steps {
                 dir('terraform_devops/terrafor-ec2') {
                     withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: AWS_CREDENTIALS_ID]
                     ]) {
                         sh 'terraform apply -auto-approve'
                     }
@@ -110,8 +96,7 @@ pipeline {
             }
         }
 
-        // 8️⃣ Cleanup workspace
-        stage('Cleanup Workspace') {
+        stage('Cleanup') {
             steps {
                 cleanWs()
             }
@@ -123,8 +108,7 @@ pipeline {
             echo "✅ Pipeline completed successfully"
         }
         failure {
-            echo "❌ Pipeline failed – check logs above"
+            echo "❌ Pipeline failed – check logs"
         }
     }
 }
-
