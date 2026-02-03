@@ -32,8 +32,7 @@ pipeline {
             steps {
                 dir('docker-project-main/backend') {
                     sh """
-                        docker build -t ${BACKEND_IMAGE}:latest .
-                        docker tag ${BACKEND_IMAGE}:latest ${BACKEND_IMAGE}:${BUILD_NUMBER}
+                        docker build -t ${BACKEND_IMAGE} .
                     """
                 }
             }
@@ -43,8 +42,7 @@ pipeline {
             steps {
                 dir('docker-project-main/frontend') {
                     sh """
-                        docker build -t ${FRONTEND_IMAGE}:latest .
-                        docker tag ${FRONTEND_IMAGE}:latest ${FRONTEND_IMAGE}:${BUILD_NUMBER}
+                        docker build -t ${FRONTEND_IMAGE} .
                     """
                 }
             }
@@ -62,11 +60,9 @@ pipeline {
                     sh """
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-                        docker push ${BACKEND_IMAGE}:latest
-                        docker push ${BACKEND_IMAGE}:${BUILD_NUMBER}
+                        docker push ${BACKEND_IMAGE}
 
-                        docker push ${FRONTEND_IMAGE}:latest
-                        docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER}
+                        docker push ${FRONTEND_IMAGE}
 
                         docker logout
                     """
@@ -75,17 +71,24 @@ pipeline {
         }
 
         stage('Terraform Init') {
-            steps {
-                dir('terraform_devops/terrafor-ec2') {
-                    withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding',
-                         credentialsId: AWS_CREDENTIALS_ID]
-                    ]) {
-                        sh "terraform init"
-                    }
-                }
-            }
+          steps {
+            dir('terraform_devops/terrafor-ec2') {
+              withCredentials([
+                string(
+                    credentialsId: 'AWS_CREDENTIALS_ID',
+                    variable: 'AWS_SECRET'
+                )
+              ]) {
+                    sh '''
+                       export AWS_ACCESS_KEY_ID=$(echo $AWS_SECRET | cut -d: -f1)
+                       export AWS_SECRET_ACCESS_KEY=$(echo $AWS_SECRET | cut -d: -f2)
+                       
+                    '''
+                   }
+               }
+           }
         }
+
 
         stage('Terraform Plan') {
             steps {
