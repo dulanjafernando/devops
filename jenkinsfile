@@ -15,7 +15,7 @@ pipeline {
         FRONTEND_IMAGE = "${DOCKER_REPO}:frontend"
 
         // ------------- AWS / TERRAFORM --------
-        AWS_CREDENTIALS_ID = "aws-credentials"
+        AWS_CREDENTIALS_ID = "aws-credentials"  // This should match your Jenkins credential ID
     }
 
     stages {
@@ -59,11 +59,8 @@ pipeline {
                 ]) {
                     sh """
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-
                         docker push ${BACKEND_IMAGE}
-
                         docker push ${FRONTEND_IMAGE}
-
                         docker logout
                     """
                 }
@@ -71,33 +68,38 @@ pipeline {
         }
 
         stage('Terraform Init') {
-          steps {
-            dir('terraform_devops/terrafor-ec2') {
-              withCredentials([
-                string(
-                    credentialsId: 'AWS_CREDENTIALS_ID',
-                    variable: 'AWS_SECRET'
-                )
-              ]) {
-                    sh '''
-                       export AWS_ACCESS_KEY_ID=$(echo $AWS_SECRET | cut -d: -f1)
-                       export AWS_SECRET_ACCESS_KEY=$(echo $AWS_SECRET | cut -d: -f2)
-                       
-                    '''
-                   }
-               }
-           }
+            steps {
+                dir('terraform_devops/terrafor-ec2') {
+                    withCredentials([
+                        aws(
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+                            credentialsId: "${AWS_CREDENTIALS_ID}"  // Using the environment variable
+                        )
+                    ]) {
+                        sh '''
+                            # AWS credentials are already set by Jenkins
+                            terraform init
+                        '''
+                    }
+                }
+            }
         }
-
 
         stage('Terraform Plan') {
             steps {
                 dir('terraform_devops/terrafor-ec2') {
                     withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding',
-                         credentialsId: AWS_CREDENTIALS_ID]
+                        aws(
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+                            credentialsId: "${AWS_CREDENTIALS_ID}"  // Using the environment variable
+                        )
                     ]) {
-                        sh "terraform plan"
+                        sh '''
+                            # AWS credentials are already set by Jenkins
+                            terraform plan
+                        '''
                     }
                 }
             }
@@ -107,10 +109,16 @@ pipeline {
             steps {
                 dir('terraform_devops/terrafor-ec2') {
                     withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding',
-                         credentialsId: AWS_CREDENTIALS_ID]
+                        aws(
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+                            credentialsId: "${AWS_CREDENTIALS_ID}"  // Using the environment variable
+                        )
                     ]) {
-                        sh "terraform apply -auto-approve"
+                        sh '''
+                            # AWS credentials are already set by Jenkins
+                            terraform apply -auto-approve
+                        '''
                     }
                 }
             }
