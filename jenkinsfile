@@ -123,12 +123,31 @@ pipeline {
                 }
             }
         }
+        stage('Run Ansible Playbook') {
+            steps {
+                dir('/var/lib/jenkins/ansible') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-credentials',
+                         accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']
+                    ]) {
+                        sh '''
+                            set -e
+
+                            /var/lib/jenkins/.local/bin/ansible-playbook -i ec2_inventory.yml site.yml
+                        '''
+                    }
+                }
+            }
+        }
 
         stage('Cleanup Workspace') {
             steps {
                 cleanWs()
             }
         }
+        
     }
 
     post {
