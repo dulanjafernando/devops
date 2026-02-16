@@ -1,17 +1,50 @@
-# ansible/ec2_playbook.yml
 ---
-- name: Manage EC2 Instances
+- name: Get EC2 public IPs
   hosts: localhost
   connection: local
   gather_facts: no
 
   tasks:
-    - name: Gather EC2 instance information
+    - name: Gather EC2 info
       amazon.aws.ec2_instance_info:
         region: ap-south-1
+        filters:
+          instance-state-name: running
       register: ec2_instances
 
-    - name: Display instance information
-      debug:
-        msg: "Instance ID: {{ item.instance_id }}, State: {{ item.state.name }}, Public IP: {{ item.public_ip_address }}"
+    - name: Add EC2 to dynamic inventory
+      add_host:
+        name: "{{ item.public_ip_address }}"
+        groups: ec2_servers
       loop: "{{ ec2_instances.instances }}"
+      when: item.public_ip_address is defined
+
+# ----------------------------------------
+
+- name: Install Docker and Run Container
+  hosts: ec2_servers
+  become: yes
+  remote_user: ec2-user
+
+  tasks:
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ec2-user to docker group
+      command: usermod -aG docker ec2-user
+
+    - name: Run nginx container
+      docker_container:
+        name: nginx-container
+        image: nginx
+        state: started
+        ports:
+          - "80:80"

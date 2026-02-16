@@ -141,6 +141,14 @@ pipeline {
                 }
             }
         }
+        stage('Check Running Containers') {
+            steps {
+               sh '''
+                 docker ps || true
+               '''
+            }
+       } 
+
 
         stage('Cleanup Workspace') {
             steps {
