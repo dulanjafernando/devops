@@ -11,14 +11,11 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-# Security Group
 resource "aws_security_group" "web_sg" {
-  name        = "terraform-web-sg"
-  description = "Allow SSH and HTTP"
-  vpc_id      = "vpc-0dc1d85425b512e49"
+  name   = "terraform-web-sg"
+  vpc_id = "vpc-0dc1d85425b512e49"
 
   ingress {
-    description = "SSH access"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -26,7 +23,13 @@ resource "aws_security_group" "web_sg" {
   }
 
   ingress {
-    description = "HTTP access"
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -41,26 +44,17 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-# EC2 Instance
-resource "aws_instance" "my_ec2" {
-  ami           = "ami-02eb7a4783e7e9317"   # Amazon Linux 2 (ap-south-1)
+resource "aws_instance" "devops_ec2" {
+  ami           = "ami-02eb7a4783e7e9317"
   instance_type = "t3.micro"
+  key_name      = "Jenkins-new-key"   # your AWS keypair
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
   tags = {
-    Name = "Terraform-EC2-Docker"
+    Name = "DevOps-EC2"
   }
+}
 
-  # Install Docker & Run Container Automatically
-  user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
-              amazon-linux-extras install docker -y
-              systemctl start docker
-              systemctl enable docker
-              usermod -aG docker ec2-user
-
-              # Run nginx container
-              docker run -d -p 80:80 nginx
-              EOF
+output "public_ip" {
+  value = aws_instance.devops_ec2.public_ip
 }
