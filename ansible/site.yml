@@ -25,3 +25,16 @@
           - "{{ backend_port }}:3000"
 
     - name: Pull frontend image
+      community.docker.docker_container:
+        name: frontend
+        image: "{{ frontend_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ frontend_port }}:80"
+
+    - name: Display deployment status
+      debug:
+        msg:
+          - "✅ Backend deployed on http://localhost:{{ backend_port }}"
+          - "✅ Frontend deployed on http://localhost:{{ frontend_port }}"

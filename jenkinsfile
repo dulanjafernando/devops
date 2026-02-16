@@ -67,62 +67,10 @@ pipeline {
             }
         }
 
-        // stage('Terraform Init') {
-        //     steps {
-        //         dir('terraform_devops/terrafor-ec2') {
-        //             withCredentials([
-        //                 aws(
-        //                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-        //                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
-        //                     credentialsId: "${AWS_CREDENTIALS_ID}"  // Using the environment variable
-        //                 )
-        //             ]) {
-        //                 sh '''
-        //                     # AWS credentials are already set by Jenkins
-        //                     terraform init
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
+        
+       
 
-        // stage('Terraform Plan') {
-        //     steps {
-        //         dir('terraform_devops/terrafor-ec2') {
-        //             withCredentials([
-        //                 aws(
-        //                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-        //                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
-        //                     credentialsId: "${AWS_CREDENTIALS_ID}"  // Using the environment variable
-        //                 )
-        //             ]) {
-        //                 sh '''
-        //                     # AWS credentials are already set by Jenkins
-        //                     terraform plan
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
-
-        // stage('Terraform Apply') {
-        //     steps {
-        //         dir('terraform_devops/terrafor-ec2') {
-        //             withCredentials([
-        //                 aws(
-        //                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-        //                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
-        //                     credentialsId: "${AWS_CREDENTIALS_ID}"  // Using the environment variable
-        //                 )
-        //             ]) {
-        //                 sh '''
-        //                     # AWS credentials are already set by Jenkins
-        //                     terraform apply -auto-approve
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
+       
         stage('Run Ansible Playbook') {
             steps {
                 withCredentials([
@@ -133,7 +81,7 @@ pipeline {
                 ]) {
                     sh '''
                         set -e
-                        ansible-playbook -i ansible/ec2_inventory.yml ansible/site.yml
+                        /var/lib/jenkins/.local/bin/ansible-playbook -i ansible/ec2_inventory.yml ansible/site.yml
                     '''
                 }
             }
