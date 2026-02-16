@@ -30,7 +30,7 @@ function Home() {
 
     const fetchFoodItems = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/food");
+            const response = await axios.get("http://13.233.113.169:3000/food");
             if (response.data.success) {
                 setFoodItems(response.data.data);
             }
@@ -45,7 +45,7 @@ function Home() {
         setError("");
         try {
             // Call logout endpoint
-            await axios.post("http://localhost:3000/logout");
+            await axios.post("http://13.233.113.169:3000/logout");
             
             // Clear localStorage
             localStorage.removeItem("currentUser");

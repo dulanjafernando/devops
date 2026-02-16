@@ -27,7 +27,7 @@ function Admin() {
     const fetchFoods = async () => {
         try {
             setLoading(true);
-            const response = await axios.get("http://localhost:3000/food");
+            const response = await axios.get("http://13.233.113.169:3000/food");
             if (response.data.success) {
                 setFoods(response.data.data);
             }

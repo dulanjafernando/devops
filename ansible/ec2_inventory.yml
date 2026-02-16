@@ -1,0 +1,17 @@
+# ansible/ec2_playbook.yml
+---
+- name: Manage EC2 Instances
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: Gather EC2 instance information
+      amazon.aws.ec2_instance_info:
+        region: ap-south-1
+      register: ec2_instances
+
+    - name: Display instance information
+      debug:
+        msg: "Instance ID: {{ item.instance_id }}, State: {{ item.state.name }}, Public IP: {{ item.public_ip_address }}"
+      loop: "{{ ec2_instances.instances }}"

@@ -39,7 +39,7 @@ function SignUp() {
     setMessage("");
 
     try {
-      const response = await axios.post("http://localhost:3000/signup", {
+      const response = await axios.post("http://13.233.113.169:3000/signup", {
         username: formData.username,
         password: formData.password
       });
