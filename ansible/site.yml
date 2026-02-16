@@ -20,18 +20,17 @@
         name: "{{ item.public_ip_address }}"
         groups: ec2_servers
         ansible_user: ec2-user
-        ansible_ssh_private_key_file: /var/lib/jenkins/Jenkins-new-key.pem
+        ansible_ssh_private_key_file: /var/lib/jenkins/Jenkins-key.pem
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
       loop: "{{ ec2_instances.instances }}"
       when: item.public_ip_address is defined
 
-
 ###############################
-# 2️⃣ INSTALL DOCKER + RUN CONTAINERS
+# 2️⃣ INSTALL DOCKER + RUN APP
 ###############################
 - name: Deploy Docker Containers
   hosts: ec2_servers
   become: yes
-  gather_facts: no
 
   vars:
     backend_image: "dulanjah/devops_engineering:backend"
@@ -50,9 +49,9 @@
         state: started
         enabled: yes
 
-    - name: Add ec2-user to docker group
-      command: usermod -aG docker ec2-user
-      ignore_errors: yes
+    - name: Install python docker SDK
+      pip:
+        name: docker
 
     - name: Pull backend image
       community.docker.docker_container:
