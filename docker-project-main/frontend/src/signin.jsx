@@ -56,7 +56,7 @@ function SignIn() {
             <div className="auth-right">
                 <div className="form-box">
                     <div className="form-header">
-                        <h1>Welcome Back</h1>
+                        <h1>Welcome</h1>
                         <p>Sign in to your account</p>
                     </div>
 
