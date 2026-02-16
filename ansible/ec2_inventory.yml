@@ -1,50 +1,12 @@
 ---
-- name: Get EC2 public IPs
-  hosts: localhost
-  connection: local
-  gather_facts: no
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: "{{ ansible_playbook_python }}"
 
-  tasks:
-    - name: Gather EC2 info
-      amazon.aws.ec2_instance_info:
-        region: ap-south-1
-        filters:
-          instance-state-name: running
-      register: ec2_instances
-
-    - name: Add EC2 to dynamic inventory
-      add_host:
-        name: "{{ item.public_ip_address }}"
-        groups: ec2_servers
-      loop: "{{ ec2_instances.instances }}"
-      when: item.public_ip_address is defined
-
-# ----------------------------------------
-
-- name: Install Docker and Run Container
-  hosts: ec2_servers
-  become: yes
-  remote_user: ec2-user
-
-  tasks:
-    - name: Install Docker
-      yum:
-        name: docker
-        state: present
-
-    - name: Start Docker
-      service:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Add ec2-user to docker group
-      command: usermod -aG docker ec2-user
-
-    - name: Run nginx container
-      docker_container:
-        name: nginx-container
-        image: nginx
-        state: started
-        ports:
-          - "80:80"
+  vars:
+    backend_image: "dulanjah/devops_engineering:backend"
+    frontend_image: "dulanjah/devops_engineering:frontend"
+    backend_port: 3000
+    frontend_port: 80

@@ -1,58 +1,19 @@
 ---
 ###############################
-# 1️⃣ GET EC2 PUBLIC IPS
+# DEPLOY DOCKER CONTAINERS TO LOCALHOST
 ###############################
-- name: Get EC2 public IPs
+- name: Deploy Docker Containers on Localhost
   hosts: localhost
   connection: local
-  gather_facts: no
-
-  tasks:
-    - name: Gather EC2 info
-      amazon.aws.ec2_instance_info:
-        region: ap-south-1
-        filters:
-          instance-state-name: running
-      register: ec2_instances
-
-    - name: Add EC2 to dynamic inventory
-      add_host:
-        name: "{{ item.public_ip_address }}"
-        groups: ec2_servers
-        ansible_user: ec2-user
-        ansible_ssh_private_key_file: /var/lib/jenkins/Jenkins-new-key.pem
-      loop: "{{ ec2_instances.instances }}"
-      when: item.public_ip_address is defined
-
-
-###############################
-# 2️⃣ INSTALL DOCKER + RUN CONTAINERS
-###############################
-- name: Deploy Docker Containers
-  hosts: ec2_servers
-  become: yes
   gather_facts: no
 
   vars:
     backend_image: "dulanjah/devops_engineering:backend"
     frontend_image: "dulanjah/devops_engineering:frontend"
+    backend_port: 3000
+    frontend_port: 80
 
   tasks:
-
-    - name: Install Docker
-      yum:
-        name: docker
-        state: present
-
-    - name: Start Docker
-      service:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Add ec2-user to docker group
-      command: usermod -aG docker ec2-user
-      ignore_errors: yes
 
     - name: Pull backend image
       community.docker.docker_container:
@@ -61,7 +22,7 @@
         state: started
         restart_policy: always
         ports:
-          - "3000:3000"
+          - "{{ backend_port }}:3000"
 
     - name: Pull frontend image
       community.docker.docker_container:
@@ -70,4 +31,10 @@
         state: started
         restart_policy: always
         ports:
-          - "80:80"
+          - "{{ frontend_port }}:80"
+
+    - name: Display deployment status
+      debug:
+        msg:
+          - "✅ Backend deployed on http://localhost:{{ backend_port }}"
+          - "✅ Frontend deployed on http://localhost:{{ frontend_port }}"

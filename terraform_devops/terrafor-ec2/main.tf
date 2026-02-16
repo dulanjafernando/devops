@@ -47,7 +47,7 @@ resource "aws_security_group" "web_sg" {
 resource "aws_instance" "devops_ec2" {
   ami           = "ami-02eb7a4783e7e9317"
   instance_type = "t3.micro"
-  key_name      = "Jenkins-new-key"   # your AWS keypair
+  key_name      = "Jenkins key"   
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
   tags = {
