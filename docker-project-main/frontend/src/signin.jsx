@@ -102,7 +102,7 @@ function SignIn() {
                     </form>
 
                     <div className="form-footer">
-                        <p>Don't have an account? <Link to="/signup" className="link">Sign up</Link></p>
+                        <p>Don't have an account? <Link to="/signup" className="link">Please Sign up</Link></p>
                     </div>
                 </div>
             </div>
