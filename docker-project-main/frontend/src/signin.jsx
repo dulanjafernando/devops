@@ -62,7 +62,7 @@ function SignIn() {
 
                     <form onSubmit={handleSubmit} className="signin-form">
                         <div className="form-group">
-                            <label htmlFor="username">Username</label>
+                            <label htmlFor="username">Type Username</label>
                             <input
                                 type="text"
                                 id="username"
