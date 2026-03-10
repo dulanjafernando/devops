@@ -28,13 +28,19 @@ function Admin() {
     const fetchFoods = async () => {
         try {
             setLoading(true);
+            setError("");
             const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.FOOD_LIST}`);
             if (response.data.success) {
                 setFoods(response.data.data);
+            } else {
+                setError("Failed to load food items");
             }
         } catch (err) {
-            setError("Error fetching food items");
-            console.error(err);
+            console.error("Fetch foods error:", err);
+            const errorMsg = err.response?.data?.message || 
+                           err.message || 
+                           "Error fetching food items";
+            setError(`❌ ${errorMsg}`);
         } finally {
             setLoading(false);
         }
@@ -99,22 +105,56 @@ function Admin() {
         setSuccess("");
 
         try {
+            if (!formData.name || !formData.price || !formData.image) {
+                setError("Please fill in all required fields (name, price, image)");
+                setLoading(false);
+                return;
+            }
+
+            // Prepare data with price as number
+            const submitData = {
+                name: formData.name.trim(),
+                price: parseFloat(formData.price),
+                image: formData.image,
+                description: formData.description.trim()
+            };
+
             if (editingId) {
                 // Update existing food
-                await axios.put(`${API_BASE_URL}${API_ENDPOINTS.FOOD_UPDATE(editingId)}`, formData);
-                setSuccess("Food item updated successfully!");
+                const response = await axios.put(
+                    `${API_BASE_URL}${API_ENDPOINTS.FOOD_UPDATE(editingId)}`, 
+                    submitData
+                );
+                if (response.data.success) {
+                    setSuccess("✓ Food item updated successfully!");
+                } else {
+                    setError(response.data.message || "Failed to update food item");
+                }
             } else {
                 // Add new food
-                await axios.post(`${API_BASE_URL}${API_ENDPOINTS.FOOD_CREATE}`, formData);
-                setSuccess("Food item added successfully!");
+                const response = await axios.post(
+                    `${API_BASE_URL}${API_ENDPOINTS.FOOD_CREATE}`, 
+                    submitData
+                );
+                if (response.data.success) {
+                    setSuccess("✓ Food item added successfully!");
+                } else {
+                    setError(response.data.message || "Failed to add food item");
+                }
             }
             
             setFormData({ name: "", price: "", image: "", description: "" });
+            setImagePreview("");
             setEditingId(null);
             setShowForm(false);
-            fetchFoods();
+            setTimeout(() => fetchFoods(), 500);
         } catch (err) {
-            setError(err.response?.data?.message || "Error saving food item");
+            console.error("Error details:", err);
+            const errorMsg = err.response?.data?.message || 
+                           err.response?.data?.error || 
+                           err.message || 
+                           "Error saving food item";
+            setError(`❌ ${errorMsg}`);
         } finally {
             setLoading(false);
         }
@@ -136,12 +176,25 @@ function Admin() {
         if (window.confirm("Are you sure you want to delete this item?")) {
             try {
                 setLoading(true);
-                await axios.delete(`${API_BASE_URL}${API_ENDPOINTS.FOOD_DELETE(id)}`);
-                setSuccess("Food item deleted successfully!");
-                fetchFoods();
+                setError("");
+                setSuccess("");
+                
+                const response = await axios.delete(`${API_BASE_URL}${API_ENDPOINTS.FOOD_DELETE(id)}`);
+                
+                if (response.data.success) {
+                    setSuccess("✓ Food item deleted successfully!");
+                    setFoods(foods.filter(food => food._id !== id));
+                    setTimeout(() => fetchFoods(), 500);
+                } else {
+                    setError(response.data.message || "Failed to delete food item");
+                }
             } catch (err) {
-                setError(err.response?.data?.message || "Error deleting food item");
-                console.error(err);
+                console.error("Delete error details:", err);
+                const errorMsg = err.response?.data?.message || 
+                               err.response?.data?.error || 
+                               err.message || 
+                               "Error deleting food item";
+                setError(`❌ ${errorMsg}`);
             } finally {
                 setLoading(false);
             }
