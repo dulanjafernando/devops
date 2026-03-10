@@ -8,7 +8,7 @@ const app = express();
 const port = 3000;
 
 // Use MongoDB container name for Docker, localhost for local development
-const mongoURI = process.env.MONGODB_URI || 'mongodb://mongo:27017/database';
+const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://devops:1234@devops.f8kg8pn.mongodb.net/?appName=devops';
 
 mongoose.connect(mongoURI).then(() => {
     console.log('Successfully connected to MongoDB');

@@ -72,7 +72,7 @@ function SignUp() {
       <div className="auth-right">
         <div className="form-box">
           <div className="form-header">
-            <h1>Create Account</h1>
+            <h1>Create Account First</h1>
             <p>Join us for a great experience</p>
           </div>
 

@@ -90,7 +90,7 @@ function Home() {
                 <span className="cart-count">{getCartCount()}</span>
             </div>
             <div className="home-header">
-                <h1>Welcome to FoodHub! 🍽️</h1>
+                <h1>FoodHub! 🍽️</h1>
                 <p className="subtitle">Your favorite food delivery platform</p>
             </div>
 

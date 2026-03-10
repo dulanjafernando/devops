@@ -57,13 +57,13 @@ function SignIn() {
             <div className="auth-right">
                 <div className="form-box">
                     <div className="form-header">
-                        <h1>Welcome Back</h1>
+                        <h1>My name is Dulanja</h1>
                         <p>Sign in to your account</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="signin-form">
                         <div className="form-group">
-                            <label htmlFor="username">Username</label>
+                            <label htmlFor="username">Type Username</label>
                             <input
                                 type="text"
                                 id="username"
@@ -103,7 +103,7 @@ function SignIn() {
                     </form>
 
                     <div className="form-footer">
-                        <p>Don't have an account? <Link to="/signup" className="link">Sign up</Link></p>
+                        <p>Don't have an account? <Link to="/signup" className="link">Please Sign up</Link></p>
                     </div>
                 </div>
             </div>
