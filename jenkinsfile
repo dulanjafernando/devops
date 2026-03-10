@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    options {
+        timeout(time: 90, unit: 'MINUTES')
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
     environment {
         // ---------------- GIT ----------------
         GIT_REPO        = "https://github.com/dulanjafernando/devops.git"
@@ -32,7 +38,12 @@ pipeline {
             steps {
                 dir('docker-project-main/backend') {
                     sh """
-                        docker build -t ${BACKEND_IMAGE} .
+                        echo "Building Backend Image: ${BACKEND_IMAGE}"
+                        docker build \
+                            --no-cache \
+                            -t ${BACKEND_IMAGE} \
+                            -f Dockerfile . || exit 1
+                        echo "Backend image built successfully!"
                     """
                 }
             }
@@ -42,7 +53,12 @@ pipeline {
             steps {
                 dir('docker-project-main/frontend') {
                     sh """
-                        docker build -t ${FRONTEND_IMAGE} .
+                        echo "Building Frontend Image: ${FRONTEND_IMAGE}"
+                        docker build \
+                            --no-cache \
+                            -t ${FRONTEND_IMAGE} \
+                            -f Dockerfile . || exit 1
+                        echo "Frontend image built successfully!"
                     """
                 }
             }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { API_BASE_URL, API_ENDPOINTS } from "./config/api.js";
 import foodImage from "./assets/food.jpg";
 import "./signin.css";
 
@@ -27,7 +28,7 @@ function SignIn() {
         setMessage("");
         
         try {
-            const response = await axios.post("http://13.233.113.169:3000/signin", formData);
+            const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.SIGNIN}`, formData);
             // Save username to localStorage
             localStorage.setItem("currentUser", formData.username);
             setMessage("✓ Sign in successful!");

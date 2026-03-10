@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL, API_ENDPOINTS } from "./config/api.js";
 import "./admin.css";
 
 function Admin() {
@@ -27,7 +28,7 @@ function Admin() {
     const fetchFoods = async () => {
         try {
             setLoading(true);
-            const response = await axios.get("http://13.233.113.169:3000/food");
+            const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.FOOD_LIST}`);
             if (response.data.success) {
                 setFoods(response.data.data);
             }
@@ -100,11 +101,11 @@ function Admin() {
         try {
             if (editingId) {
                 // Update existing food
-                await axios.put(`http://localhost:3000/food/${editingId}`, formData);
+                await axios.put(`${API_BASE_URL}${API_ENDPOINTS.FOOD_UPDATE(editingId)}`, formData);
                 setSuccess("Food item updated successfully!");
             } else {
                 // Add new food
-                await axios.post("http://localhost:3000/food", formData);
+                await axios.post(`${API_BASE_URL}${API_ENDPOINTS.FOOD_CREATE}`, formData);
                 setSuccess("Food item added successfully!");
             }
             
@@ -135,11 +136,12 @@ function Admin() {
         if (window.confirm("Are you sure you want to delete this item?")) {
             try {
                 setLoading(true);
-                await axios.delete(`http://localhost:3000/food/${id}`);
+                await axios.delete(`${API_BASE_URL}${API_ENDPOINTS.FOOD_DELETE(id)}`);
                 setSuccess("Food item deleted successfully!");
                 fetchFoods();
             } catch (err) {
-                setError("Error deleting food item");
+                setError(err.response?.data?.message || "Error deleting food item");
+                console.error(err);
             } finally {
                 setLoading(false);
             }
