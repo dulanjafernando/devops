@@ -143,19 +143,22 @@ app.put('/food/:id', async (req, res) => {
     try {
         const { name, price, image, description } = req.body;
 
-        if (!name || !price || !image) {
-            return res.status(400).json({ message: 'Name, price, and image are required', success: false });
+        // Allow partial updates - only validate provided fields
+        const updateData = {};
+        if (name !== undefined) updateData.name = name;
+        if (price !== undefined) updateData.price = parseFloat(price);
+        if (image !== undefined) updateData.image = image;
+        if (description !== undefined) updateData.description = description;
+
+        // At least one field must be provided
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ message: 'At least one field is required for update', success: false });
         }
 
         const food = await Food.findByIdAndUpdate(
             req.params.id,
-            {
-                name,
-                price: parseFloat(price),
-                image,
-                description: description || ''
-            },
-            { new: true }
+            updateData,
+            { new: true, runValidators: true }
         );
 
         if (!food) {
@@ -178,7 +181,7 @@ app.delete('/food/:id', async (req, res) => {
             return res.status(404).json({ message: 'Food item not found', success: false });
         }
 
-        res.status(200).json({ message: 'Food item deleted successfully', success: true });
+        res.status(204).send();
     } catch (e) {
         console.error(e);
         res.status(500).json({ message: 'Error deleting food item', success: false });
