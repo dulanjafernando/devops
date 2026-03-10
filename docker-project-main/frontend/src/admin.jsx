@@ -17,9 +17,10 @@ function Admin() {
     const [formData, setFormData] = useState({
         name: "",
         price: "",
-        image: null,
+        image: "",
         description: ""
     });
+    const [isImageReady, setIsImageReady] = useState(true);
 
     useEffect(() => {
         fetchFoods();
@@ -52,7 +53,9 @@ function Admin() {
                     return;
                 }
 
-                // Read file and convert to base64with compression
+                setIsImageReady(false); // Mark as not ready while processing
+                
+                // Read file and convert to base64
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     // Compress image before storing
@@ -89,31 +92,77 @@ function Admin() {
             const compressed = canvas.toDataURL('image/jpeg', 0.8);
             setFormData(prev => ({ ...prev, image: compressed }));
             setImagePreview(compressed);
+            setIsImageReady(true); // Mark as ready after compression
+        };
+        img.onerror = () => {
+            setError("Failed to process image");
+            setIsImageReady(true);
         };
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         setError("");
         setSuccess("");
 
+        // Validate form
+        if (!formData.name || !formData.price) {
+            setError("Food name and price are required");
+            return;
+        }
+
+        if (!editingId && !formData.image) {
+            setError("Image is required for new food items");
+            return;
+        }
+
+        if (!isImageReady && !editingId) {
+            setError("Please wait for image to finish processing");
+            return;
+        }
+
+        setLoading(true);
+
         try {
+            const submitData = {
+                name: formData.name,
+                price: parseFloat(formData.price),
+                description: formData.description || ""
+            };
+
+            // Only include image if it exists
+            if (formData.image) {
+                submitData.image = formData.image;
+            }
+
             if (editingId) {
                 // Update existing food
-                await axios.put(`${API_BASE_URL}${API_ENDPOINTS.FOOD_UPDATE(editingId)}`, formData);
-                setSuccess("Food item updated successfully!");
+                const response = await axios.put(
+                    `${API_BASE_URL}${API_ENDPOINTS.FOOD_UPDATE(editingId)}`,
+                    submitData
+                );
+                if (response.data.success || response.status === 200) {
+                    setSuccess("Food item updated successfully!");
+                }
             } else {
                 // Add new food
-                await axios.post(`${API_BASE_URL}${API_ENDPOINTS.FOOD_CREATE}`, formData);
-                setSuccess("Food item added successfully!");
+                const response = await axios.post(
+                    `${API_BASE_URL}${API_ENDPOINTS.FOOD_CREATE}`,
+                    submitData
+                );
+                if (response.data.success || response.status === 201) {
+                    setSuccess("Food item added successfully!");
+                }
             }
             
             setFormData({ name: "", price: "", image: "", description: "" });
             setEditingId(null);
             setShowForm(false);
-            fetchFoods();
+            setImagePreview("");
+            setIsImageReady(true);
+            await fetchFoods();
         } catch (err) {
+            console.error("Error:", err);
             setError(err.response?.data?.message || "Error saving food item");
         } finally {
             setLoading(false);
@@ -149,11 +198,12 @@ function Admin() {
     };
 
     const handleCancel = () => {
-        setFormData({ name: "", price: "", image: null, description: "" });
+        setFormData({ name: "", price: "", image: "", description: "" });
         setImagePreview("");
         setEditingId(null);
         setShowForm(false);
         setError("");
+        setIsImageReady(true);
     };
 
     const handleLogout = () => {
@@ -219,6 +269,7 @@ function Admin() {
                                     required={!editingId} // Required only when adding new
                                 />
                                 <p className="file-info">Accepted formats: JPG, PNG, GIF. Max size: 5MB</p>
+                                {!isImageReady && !editingId && <p className="file-info" style={{color: '#ff6b6b'}}>Processing image...</p>}
                                 {imagePreview && (
                                     <div className="image-preview">
                                         <img src={imagePreview} alt="Preview" />
@@ -239,7 +290,11 @@ function Admin() {
                             </div>
 
                             <div className="form-buttons">
-                                <button type="submit" className="btn-save" disabled={loading}>
+                                <button 
+                                    type="submit" 
+                                    className="btn-save" 
+                                    disabled={loading || (!editingId && !isImageReady)}
+                                >
                                     {loading ? "Saving..." : (editingId ? "Update Item" : "Add Item")}
                                 </button>
                                 <button type="button" onClick={handleCancel} className="btn-cancel">
