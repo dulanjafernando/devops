@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    options {
+        timeout(time: 1, unit: 'HOURS')
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
     environment {
         // ---------------- GIT ----------------
         GIT_REPO        = "https://github.com/dulanjafernando/devops.git"
@@ -32,7 +38,13 @@ pipeline {
             steps {
                 dir('docker-project-main/backend') {
                     sh """
-                        docker build -t ${BACKEND_IMAGE} .
+                        echo "Building Backend Image: ${BACKEND_IMAGE}"
+                        docker build \
+                            --no-cache \
+                            --build-arg BUILDKIT_INLINE_CACHE=1 \
+                            -t ${BACKEND_IMAGE} \
+                            -f Dockerfile .
+                        echo "Backend Image built successfully!"
                     """
                 }
             }
@@ -42,7 +54,13 @@ pipeline {
             steps {
                 dir('docker-project-main/frontend') {
                     sh """
-                        docker build -t ${FRONTEND_IMAGE} .
+                        echo "Building Frontend Image: ${FRONTEND_IMAGE}"
+                        docker build \
+                            --no-cache \
+                            --build-arg BUILDKIT_INLINE_CACHE=1 \
+                            -t ${FRONTEND_IMAGE} \
+                            -f Dockerfile .
+                        echo "Frontend Image built successfully!"
                     """
                 }
             }
@@ -58,10 +76,17 @@ pipeline {
                     )
                 ]) {
                     sh """
+                        echo "Logging into Docker Hub..."
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        
+                        echo "Pushing Backend Image..."
                         docker push ${BACKEND_IMAGE}
+                        
+                        echo "Pushing Frontend Image..."
                         docker push ${FRONTEND_IMAGE}
+                        
                         docker logout
+                        echo "Docker images pushed successfully!"
                     """
                 }
             }
@@ -81,6 +106,7 @@ pipeline {
                 ]) {
                     sh '''
                         set -e
+                        echo "Running Ansible Playbook..."
                         /var/lib/jenkins/.local/bin/ansible-playbook -i ansible/ec2_inventory.yml ansible/site.yml
                     '''
                 }
@@ -89,6 +115,7 @@ pipeline {
         stage('Check Running Containers') {
             steps {
                sh '''
+                 echo "Checking running Docker containers..."
                  docker ps || true
                '''
             }

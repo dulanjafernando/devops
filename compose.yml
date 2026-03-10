@@ -3,28 +3,58 @@ services:
   frontend:
     build:
       context: ./docker-project-main/frontend
+      dockerfile: Dockerfile
+      cache_from:
+        - ${FRONTEND_IMAGE}
+    image: ${FRONTEND_IMAGE:-frontend:latest}
     ports:
       - "4000:80"
     depends_on:
       - mongo
     restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 
   backend:
     build:
       context: ./docker-project-main/backend
+      dockerfile: Dockerfile
+      cache_from:
+        - ${BACKEND_IMAGE}
+    image: ${BACKEND_IMAGE:-backend:latest}
     ports:
       - "3000:3000"
     depends_on:
       - mongo
     restart: always
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/database
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   mongo:
-    image: mongo
+    image: mongo:latest
     restart: always
     ports:
       - "27018:27017"
     volumes:
       - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=database
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mongo_data:
