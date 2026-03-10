@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL, API_ENDPOINTS } from "./config/api.js";
 import "./admin.css";
 
 function Admin() {
@@ -28,12 +27,12 @@ function Admin() {
     const fetchFoods = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${API_BASE_URL}/food`);
+            const response = await axios.get("http://13.233.113.169:3000/food");
             if (response.data.success) {
                 setFoods(response.data.data);
             }
         } catch (err) {
-            setError("Error fetching food items: " + (err.response?.data?.message || err.message));
+            setError("Error fetching food items");
             console.error(err);
         } finally {
             setLoading(false);
@@ -101,26 +100,20 @@ function Admin() {
         try {
             if (editingId) {
                 // Update existing food
-                const response = await axios.put(`${API_BASE_URL}/food/${editingId}`, formData);
-                if (response.data.success) {
-                    setSuccess("Food item updated successfully!");
-                }
+                await axios.put(`http://localhost:3000/food/${editingId}`, formData);
+                setSuccess("Food item updated successfully!");
             } else {
                 // Add new food
-                const response = await axios.post(`${API_BASE_URL}/food`, formData);
-                if (response.data.success) {
-                    setSuccess("Food item added successfully!");
-                }
+                await axios.post("http://localhost:3000/food", formData);
+                setSuccess("Food item added successfully!");
             }
             
             setFormData({ name: "", price: "", image: "", description: "" });
-            setImagePreview("");
             setEditingId(null);
             setShowForm(false);
             fetchFoods();
         } catch (err) {
-            setError(err.response?.data?.message || "Error saving food item: " + err.message);
-            console.error(err);
+            setError(err.response?.data?.message || "Error saving food item");
         } finally {
             setLoading(false);
         }
@@ -142,14 +135,11 @@ function Admin() {
         if (window.confirm("Are you sure you want to delete this item?")) {
             try {
                 setLoading(true);
-                const response = await axios.delete(`${API_BASE_URL}/food/${id}`);
-                if (response.data.success) {
-                    setSuccess("Food item deleted successfully!");
-                    fetchFoods();
-                }
+                await axios.delete(`http://localhost:3000/food/${id}`);
+                setSuccess("Food item deleted successfully!");
+                fetchFoods();
             } catch (err) {
-                setError(err.response?.data?.message || "Error deleting food item: " + err.message);
-                console.error(err);
+                setError("Error deleting food item");
             } finally {
                 setLoading(false);
             }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { API_BASE_URL, API_ENDPOINTS } from "./config/api.js";
 import foodImage from "./assets/food.jpg";
 import "./signup.css";
 
@@ -40,7 +39,7 @@ function SignUp() {
     setMessage("");
 
     try {
-      const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.SIGNUP}`, {
+      const response = await axios.post("http://13.233.113.169:3000/signup", {
         username: formData.username,
         password: formData.password
       });
@@ -72,7 +71,7 @@ function SignUp() {
       <div className="auth-right">
         <div className="form-box">
           <div className="form-header">
-            <h1>Create Account First</h1>
+            <h1>Create Account</h1>
             <p>Join us for a great experience</p>
           </div>
 

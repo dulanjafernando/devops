@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL, API_ENDPOINTS } from "./config/api.js";
 import "./home.css";
 
 function Home() {
@@ -31,7 +30,7 @@ function Home() {
 
     const fetchFoodItems = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.FOOD_LIST}`);
+            const response = await axios.get("http://13.233.113.169:3000/food");
             if (response.data.success) {
                 setFoodItems(response.data.data);
             }
@@ -46,7 +45,7 @@ function Home() {
         setError("");
         try {
             // Call logout endpoint
-            await axios.post(`${API_BASE_URL}${API_ENDPOINTS.LOGOUT}`);
+            await axios.post("http://13.233.113.169:3000/logout");
             
             // Clear localStorage
             localStorage.removeItem("currentUser");

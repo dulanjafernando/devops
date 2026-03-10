@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { API_BASE_URL, API_ENDPOINTS } from "./config/api.js";
 import foodImage from "./assets/food.jpg";
 import "./signin.css";
 
@@ -28,7 +27,7 @@ function SignIn() {
         setMessage("");
         
         try {
-            const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.SIGNIN}`, formData);
+            const response = await axios.post("http://13.233.113.169:3000/signin", formData);
             // Save username to localStorage
             localStorage.setItem("currentUser", formData.username);
             setMessage("✓ Sign in successful!");
@@ -57,13 +56,13 @@ function SignIn() {
             <div className="auth-right">
                 <div className="form-box">
                     <div className="form-header">
-                        <h1>My name is Dulanja</h1>
+                        <h1>Welcome Back</h1>
                         <p>Sign in to your account</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="signin-form">
                         <div className="form-group">
-                            <label htmlFor="username">Type Username</label>
+                            <label htmlFor="username">Username</label>
                             <input
                                 type="text"
                                 id="username"
@@ -103,7 +102,7 @@ function SignIn() {
                     </form>
 
                     <div className="form-footer">
-                        <p>Don't have an account? <Link to="/signup" className="link">Please Sign up</Link></p>
+                        <p>Don't have an account? <Link to="/signup" className="link">Sign up</Link></p>
                     </div>
                 </div>
             </div>
